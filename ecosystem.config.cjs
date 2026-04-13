@@ -19,8 +19,8 @@ module.exports = {
       wait_ready: false,
 
       // Logs
-      out_file: '/var/log/mcp-server/out.log',
-      error_file: '/var/log/mcp-server/error.log',
+      out_file: '/home/ubuntu/mcp-server/out.log',
+      error_file: '/home/ubuntu/mcp-server/error.log',
       merge_logs: true,
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
 

@@ -32,8 +32,12 @@ app.use((req, res, next) => {
   
   if (AUTH_TOKEN) {
     const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      next(new HttpError(401, 'Missing Authorization header'));
+      return;
+    }
     if (authHeader !== `Bearer ${AUTH_TOKEN}`) {
-      next(new HttpError(401, 'Unauthorized'));
+      next(new HttpError(401, 'Invalid token'));
       return;
     }
   }

@@ -8,9 +8,11 @@ export class HttpError extends Error {
 
   constructor(statusCode: number, message: string, options?: { expose?: boolean }) {
     super(message);
+    this.message = message;
     this.name = 'HttpError';
     this.statusCode = statusCode;
     this.expose = options?.expose ?? statusCode < 500;
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 
@@ -31,7 +33,8 @@ export function requestLogger(req: Request, res: Response, next: NextFunction) {
       {
         req: {
           method: req.method,
-          path: req.originalUrl
+          path: req.path,
+          query: sanitizeForLog(req.query)
         },
         res: {
           statusCode: res.statusCode
@@ -53,7 +56,7 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
       err: err instanceof Error ? err : new Error(String(err)),
       req: {
         method: req.method,
-        path: req.originalUrl,
+        path: req.path,
         query: sanitizeForLog(req.query)
       },
       body: sanitizeForLog(req.body)

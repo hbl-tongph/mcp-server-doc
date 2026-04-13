@@ -1,7 +1,7 @@
 import pino from 'pino';
 
 const REDACTED = '[Redacted]';
-const SENSITIVE_KEYS = new Set(['authorization', 'auth', 'authToken', 'content', 'token']);
+const SENSITIVE_KEYS = new Set(['authorization', 'auth', 'authToken', 'content', 'token', 'sessionId']);
 
 export const logger = pino({
   level: process.env.LOG_LEVEL || 'info',

@@ -205,18 +205,33 @@ export class SQLiteStorage {
       }
 
       const rows = this.db.prepare(pagedQ).all(pagedP) as any[];
-      const documents = rows.map(docRow => {
-        const tagRows = this.db.prepare('SELECT tag FROM document_tags WHERE doc_id = ?').all(docRow.id) as any[];
-        return {
-          id: docRow.id,
-          title: docRow.title,
-          content: docRow.content,
-          type: docRow.type,
-          tags: tagRows.map((r: any) => r.tag),
-          createdAt: docRow.created_at,
-          updatedAt: docRow.updated_at
-        };
-      });
+
+      let tagsByDocId = new Map<string, string[]>();
+      if (rows.length > 0) {
+        const ids = rows.map((r: any) => r.id);
+        const placeholders = ids.map(() => '?').join(',');
+        const allTagRows = this.db
+          .prepare(`SELECT doc_id, tag FROM document_tags WHERE doc_id IN (${placeholders})`)
+          .all(ids) as Array<{ doc_id: string; tag: string }>;
+        for (const { doc_id, tag } of allTagRows) {
+          const existing = tagsByDocId.get(doc_id);
+          if (existing) {
+            existing.push(tag);
+          } else {
+            tagsByDocId.set(doc_id, [tag]);
+          }
+        }
+      }
+
+      const documents = rows.map((docRow: any) => ({
+        id: docRow.id,
+        title: docRow.title,
+        content: docRow.content,
+        type: docRow.type,
+        tags: tagsByDocId.get(docRow.id) ?? [],
+        createdAt: docRow.created_at,
+        updatedAt: docRow.updated_at
+      }));
 
       return { documents, total };
     });

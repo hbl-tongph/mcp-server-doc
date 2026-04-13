@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { SQLiteStorage } from '../src/storage/sqlite.js';
+import { SQLiteStorage } from './storage/sqlite.js';
 
 function migrate() {
   const dbPath = process.env.DB_PATH || './db.sqlite';

@@ -14,8 +14,12 @@ export const updateDocHandler = (storage: SQLiteStorage, args: unknown) => {
   try {
     const params = updateDocSchema.parse(args || {});
     
-    // Check if at least one field is provided apart from ID
-    if (!params.title && !params.content && !params.type && !params.tags) {
+    const hasUpdate =
+      params.title !== undefined ||
+      params.content !== undefined ||
+      params.type !== undefined ||
+      params.tags !== undefined;
+    if (!hasUpdate) {
       return createErrorResponse('No fields to update provided');
     }
     
