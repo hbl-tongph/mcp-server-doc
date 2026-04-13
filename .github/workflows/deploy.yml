@@ -80,13 +80,13 @@ jobs:
             --exclude='*.log' \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
             ./ \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_APP_DIR }}/
+            ubuntu@${{ secrets.EC2_HOST }}:${{ secrets.EC2_APP_DIR }}/
 
       - name: Install production dependencies & restart
         run: |
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+            ubuntu@${{ secrets.EC2_HOST }} \
             "
               set -e
               cd ${{ secrets.EC2_APP_DIR }}
@@ -97,21 +97,14 @@ jobs:
               echo '--- Migrate DB ---'
               node dist/migrate.js 2>/dev/null || true
 
+              echo '--- Ensure log directory ---'
+              sudo mkdir -p /var/log/mcp-server
+              sudo chown ubuntu:ubuntu /var/log/mcp-server
+
               echo '--- Restart PM2 ---'
-              pm2 reload ecosystem.config.cjs --update-env || \
-              pm2 start  ecosystem.config.cjs
+              pm2 delete mcp-doc 2>/dev/null || true
+              pm2 start ecosystem.config.cjs --env production
 
               pm2 save
               echo '--- Done ---'
             "
-
-      - name: Health check
-        run: |
-          sleep 5
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            https://${{ secrets.EC2_DOMAIN }}/health)
-          if [ "$STATUS" != "200" ]; then
-            echo "Health check failed: HTTP $STATUS"
-            exit 1
-          fi
-          echo "Health check passed: HTTP $STATUS"

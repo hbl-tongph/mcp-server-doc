@@ -4,7 +4,7 @@ module.exports = {
     {
       name: 'mcp-doc',
       script: 'dist/index.js',
-      cwd: '/home/ec2-user/mcp-doc',   // ← đổi thành EC2_APP_DIR của bạn
+      cwd: '/home/ubuntu/mcp-server',
 
       // Node.js flags
       node_args: [],
@@ -19,14 +19,15 @@ module.exports = {
       wait_ready: false,
 
       // Logs
-      out_file: '/var/log/mcp-doc/out.log',
-      error_file: '/var/log/mcp-doc/error.log',
+      out_file: '/var/log/mcp-server/out.log',
+      error_file: '/var/log/mcp-server/error.log',
       merge_logs: true,
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
 
       // Environment (production — secrets via .env trên EC2)
       env_production: {
         NODE_ENV: 'production',
+        PORT: 3009,
       },
     },
   ],
